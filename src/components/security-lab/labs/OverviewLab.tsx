@@ -21,17 +21,40 @@ export function OverviewLab() {
         chaves, assinaturas, certificados e decisoes de validacao.
       </p>
       <div className="my-7 flex items-center gap-2 overflow-auto">
-        {['Clinicas / IoT', 'TLS / mTLS', 'Gateway / API', 'Aplicacao', 'Banco AES-256'].map((node, index, nodes) => (
+        {[
+          'Clinicas / IoT',
+          'TLS / mTLS',
+          'Gateway / API',
+          'Aplicacao',
+          'Banco AES-256',
+        ].map((node, index, nodes) => (
           <div className="flex items-center gap-2" key={node}>
-            <div className="min-w-32 rounded-xl border border-white/10 bg-[#0c2829] p-3 text-center text-xs font-bold">{node}</div>
-            {index < nodes.length - 1 && <span className="text-lg text-lime-200">-&gt;</span>}
+            <div className="min-w-32 rounded-xl border border-white/10 bg-[#0c2829] p-3 text-center text-xs font-bold">
+              {node}
+            </div>
+            {index < nodes.length - 1 && (
+              <span className="text-lg text-lime-200">-&gt;</span>
+            )}
           </div>
         ))}
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {securityLayers.map(([title, description]) => <article className="rounded-xl border border-white/10 bg-[#0c2829]/80 p-4" key={title}><strong className="block text-sm">{title}</strong><p className="mt-2 text-xs leading-5 text-slate-400">{description}</p></article>)}
+        {securityLayers.map(([title, description]) => (
+          <article
+            className="rounded-xl border border-white/10 bg-[#0c2829]/80 p-4"
+            key={title}
+          >
+            <strong className="block text-sm">{title}</strong>
+            <p className="mt-2 text-xs leading-5 text-slate-400">
+              {description}
+            </p>
+          </article>
+        ))}
       </div>
-      <p className="mt-5 rounded-xl border border-amber-300/30 bg-amber-300/10 p-3 text-xs leading-5 text-amber-100">PKI, certificados, CRL/OCSP e TLS/mTLS sao visualizacoes educacionais. AES, SHA-256, ECDSA, RSA-OAEP e ECDH usam Web Crypto API.</p>
+      <p className="mt-5 rounded-xl border border-amber-300/30 bg-amber-300/10 p-3 text-xs leading-5 text-amber-100">
+        PKI, certificados, CRL/OCSP e TLS/mTLS sao visualizacoes educacionais.
+        AES, SHA-256, ECDSA, RSA-OAEP e ECDH usam Web Crypto API.
+      </p>
     </section>
   );
 }
