@@ -9,17 +9,15 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseUrl()),
   title: {
-    default: 'Next.js Starter Template',
-    template: '%s | Next.js Starter Template',
+    default: 'BioCare Security Lab',
+    template: '%s | BioCare Security Lab',
   },
-  description:
-    'A minimal, scalable Next.js starter with TypeScript, Tailwind CSS, Auth.js, and SEO-ready routes.',
+  description: 'Laboratório educacional de criptografia aplicada e PKI.',
   openGraph: {
-    title: 'Next.js Starter Template',
-    description:
-      'A minimal, scalable Next.js starter with TypeScript, Tailwind CSS, Auth.js, and SEO-ready routes.',
+    title: 'BioCare Security Lab',
+    description: 'Laboratório educacional de criptografia aplicada e PKI.',
     type: 'website',
-    locale: 'en_US',
+    locale: 'pt_BR',
   },
 };
 
@@ -29,11 +27,11 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <body
         className={cn(
           inter.className,
-          'min-h-screen min-w-[320px] bg-dark text-white antialiased'
+          'min-h-screen min-w-[320px] bg-[#071a1c] text-white antialiased'
         )}
       >
         {children}
