@@ -1,76 +1,14 @@
 'use client';
 
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { architectureLayers, pkiSteps } from '../architecture/data';
+import type { GeneratedArtifact } from '../architecture/types';
 import { useArchitectureSimulation } from '../architecture/useArchitectureSimulation';
 
 export function ArchitectureLab() {
-  const root = useRef<HTMLDivElement>(null);
-  const simulation = useArchitectureSimulation();
-  const selected = architectureLayers[simulation.activeLayer]!;
-  const isFailure = simulation.mode === 'tamper' || simulation.mode === 'revoked';
-
-  useLayoutEffect(() => {
-    const context = gsap.context(() => {
-      gsap.from('.architecture-layer', { y: 20, opacity: 0, stagger: 0.1, duration: 0.45, ease: 'power2.out' });
-      gsap.to('.flow-dot', { y: 432, repeat: -1, duration: 3.2, ease: 'none' });
-    }, root);
-    return () => context.revert();
-  }, []);
-
-  const status = simulation.mode === 'tamper'
-    ? 'REJEITADO NO APPLICATION SERVER: o relatório alterado gera outro SHA-256 e a assinatura ECDSA não verifica.'
-    : simulation.mode === 'revoked'
-      ? 'REJEITADO NO API GATEWAY: CRL/OCSP encontrou o serial do IoT como revogado.'
-      : simulation.mode === 'running'
-        ? 'Pacote em movimento: cada camada gera e expõe seus artefatos criptográficos.'
-        : 'Execute o fluxo ou selecione uma camada para inspecionar a arquitetura.';
-
-  return (
-    <section ref={root} className="mx-auto max-w-6xl">
-      <p className="font-mono text-[10px] tracking-[.18em] text-teal-200">ARQUITETURA COMPLETA DA APLICAÇÃO · SIMULAÇÃO INTERATIVA</p>
-      <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="m-0 text-4xl font-extrabold tracking-tight md:text-5xl">Como o BioCare protege dados</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">A trilha vertical mostra por onde a informação passa, como a confiança é validada e quais arquivos/artefatos são gerados.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={simulation.run} className="rounded-lg bg-lime-200 px-3 py-2 text-xs font-extrabold text-[#062321]">Executar fluxo rápido</button>
-          <button type="button" onClick={simulation.simulateTamper} className="rounded-lg border border-rose-300/40 px-3 py-2 text-xs text-rose-100">Simular adulteração</button>
-          <button type="button" onClick={simulation.simulateRevocation} className="rounded-lg border border-amber-300/40 px-3 py-2 text-xs text-amber-100">Revogar certificado IoT</button>
-        </div>
-      </div>
-
-      <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_290px]">
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_50%_0%,rgba(45,212,191,.15),transparent_32%)] p-5">
-          <div className="flow-dot pointer-events-none absolute left-7 top-8 z-10 size-3 rounded-full bg-lime-200 shadow-[0_0_22px_#bef264]" />
-          <div className="absolute bottom-5 left-[34px] top-5 border-l border-dashed border-teal-300/40" />
-          {architectureLayers.map((layer, index) => (
-            <div className="architecture-layer relative mb-5 pl-12 last:mb-0" key={layer.id}>
-              <button type="button" onClick={() => simulation.setActiveLayer(index)} className={`w-full rounded-xl border p-4 text-left transition ${simulation.activeLayer === index ? 'border-lime-200 bg-lime-200/10 shadow-lg shadow-lime-300/10' : 'border-white/10 bg-[#0c2829]/85 hover:border-teal-200'}`}>
-                <div className="flex flex-wrap justify-between gap-3"><div className="flex gap-3"><span className="grid size-9 place-items-center rounded-lg bg-teal-300/10 text-lg text-teal-100">{layer.icon}</span><div><h2 className="m-0 text-sm font-bold">{layer.title}</h2><p className="mt-1 text-xs text-slate-400">{layer.role}</p></div></div><span className={`font-mono text-[10px] ${simulation.activeLayer === index ? 'text-lime-100' : 'text-slate-500'}`}>{simulation.activeLayer === index ? 'INSPECIONANDO' : 'CAMADA'}</span></div>
-                <div className="mt-3 flex flex-wrap gap-1">{layer.algorithms.map((algorithm) => <span key={algorithm} className="rounded bg-black/20 px-2 py-1 font-mono text-[9px] text-teal-100">{algorithm}</span>)}</div>
-              </button>
-            </div>
-          ))}
-        </div>
-        <aside className="rounded-2xl border border-white/10 bg-[#0c2829]/80 p-5">
-          <p className="font-mono text-[10px] tracking-wide text-teal-100">PKI EM PARALELO</p>
-          <ol className="mt-4 grid gap-3">{pkiSteps.map((item, index) => <li className="flex gap-3 text-xs leading-5 text-slate-300" key={item}><span className="grid size-5 shrink-0 place-items-center rounded-full bg-teal-300/10 font-mono text-[9px] text-teal-100">{index + 1}</span>{item}</li>)}</ol>
-          <p className="mt-5 border-t border-white/10 pt-4 text-xs leading-5 text-slate-400">A PKI acompanha todo o fluxo: prova identidades e bloqueia certificados revogados antes da transmissão.</p>
-        </aside>
-      </div>
-
-      <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_1.3fr]">
-        <article className={`rounded-xl border p-4 ${isFailure ? 'border-rose-300/30 bg-rose-300/10' : 'border-teal-300/25 bg-teal-300/5'}`} aria-live="polite"><p className="font-mono text-[10px] text-teal-100">ESTADO DA SIMULAÇÃO</p><p className="mt-2 text-xs leading-5 text-slate-200">{status}</p></article>
-        <article className="rounded-xl border border-white/10 bg-black/20 p-4"><p className="font-mono text-[10px] text-teal-100">CAMADA ATIVA · O QUE ACONTECE</p><h2 className="mt-2 text-base font-bold">{selected.title}</h2><dl className="mt-3 grid gap-3 text-xs leading-5 sm:grid-cols-2"><div><dt className="text-slate-500">ENTRADA</dt><dd>{selected.input}</dd></div><div><dt className="text-slate-500">PROCESSO</dt><dd>{selected.process}</dd></div><div><dt className="text-slate-500">SAÍDA</dt><dd>{selected.output}</dd></div><div><dt className="text-slate-500">PROPRIEDADE</dt><dd className="text-lime-100">{selected.security}</dd></div></dl></article>
-      </div>
-
-      <article className="mt-4 rounded-xl border border-white/10 bg-[#0c2829]/80 p-4">
-        <div className="flex flex-wrap items-center justify-between gap-2"><div><p className="font-mono text-[10px] text-teal-100">ARTEFATOS GERADOS</p><p className="mt-1 text-xs text-slate-400">Cada execução expõe os arquivos e resultados intermediários da camada ativa.</p></div><span className="rounded bg-lime-200/10 px-2 py-1 font-mono text-[10px] text-lime-100">{simulation.artifacts.length} itens</span></div>
-        <div className="mt-3 grid gap-2 md:grid-cols-2">{simulation.artifacts.length ? simulation.artifacts.map((artifact, index) => <details className="rounded-lg border border-white/10 bg-black/20 p-3" key={`${artifact.name}-${index}`}><summary className="cursor-pointer text-xs font-bold"><span className="mr-2 text-teal-100">{artifact.type}</span>{artifact.name}</summary><code className="mt-3 block break-all rounded bg-black/30 p-2 font-mono text-[10px] leading-5 text-lime-100">{artifact.content}</code><small className="mt-2 block text-[10px] text-slate-500">Gerado em {artifact.producedAt}</small></details>) : <p className="text-xs text-slate-500">Execute o fluxo para gerar payload, segredo ECDH, hash, assinatura, ciphertext e chave AES protegida.</p>}</div>
-      </article>
-    </section>
-  );
+  const root = useRef<HTMLDivElement>(null); const simulation = useArchitectureSimulation(); const [selectedArtifact, setSelectedArtifact] = useState<GeneratedArtifact>(); const layer = architectureLayers[simulation.activeLayer]!;
+  useLayoutEffect(() => { const context = gsap.context(() => { gsap.from('.architecture-layer', { opacity: 0, y: 18, stagger: .1, duration: .4 }); gsap.to('.flow-dot', { y: 430, duration: 3.2, repeat: -1, ease: 'none' }); }, root); return () => context.revert(); }, []);
+  const status = simulation.mode === 'tamper' ? 'INVÁLIDO: a alteração produz outro hash e invalida a assinatura.' : simulation.mode === 'revoked' ? 'REJEITADO: a CRL/OCSP marcou o certificado do IoT como revogado.' : simulation.mode === 'running' ? 'Executando: os artefatos são gerados a cada 520 ms.' : 'Use os controles para avançar e inspecionar o fluxo.';
+  return <section ref={root} className="mx-auto max-w-6xl"><p className="font-mono text-[10px] tracking-[.18em] text-teal-200">ARQUITETURA INTERATIVA</p><div className="mt-2 flex flex-wrap items-end justify-between gap-4"><div><h1 className="m-0 text-4xl font-extrabold tracking-tight md:text-5xl">Fluxo completo do BioCare</h1><p className="mt-3 max-w-3xl text-sm text-slate-400">Execute cada camada, veja os artefatos gerados e leia como a criptografia protege o dado.</p></div><div className="flex flex-wrap gap-2"><button className="rounded-lg bg-lime-200 px-3 py-2 text-xs font-bold text-[#062321]" type="button" onClick={simulation.run}>Executar automático</button><button className="rounded-lg border border-white/15 px-3 py-2 text-xs" type="button" onClick={simulation.previousStep}>Etapa anterior</button><button className="rounded-lg border border-teal-300/40 px-3 py-2 text-xs text-teal-100" type="button" onClick={simulation.nextStep}>Próxima etapa</button><button className="rounded-lg border border-white/15 px-3 py-2 text-xs" type="button" onClick={simulation.reset}>Reiniciar</button></div></div><div className="mt-5 flex gap-2"><button type="button" className="text-xs text-rose-100 underline" onClick={simulation.simulateTamper}>Simular adulteração</button><button type="button" className="text-xs text-amber-100 underline" onClick={simulation.simulateRevocation}>Simular certificado revogado</button></div><div className="mt-6 grid gap-5 lg:grid-cols-[1.1fr_.9fr]"><div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0c2829] p-5"><div className="flow-dot absolute left-7 top-8 size-3 rounded-full bg-lime-200 shadow-[0_0_20px_#bef264]" /><div className="absolute bottom-5 left-[34px] top-5 border-l border-dashed border-teal-300/40" />{architectureLayers.map((item, index) => <div className="architecture-layer relative mb-4 pl-12" key={item.id}><button type="button" onClick={() => simulation.inspectLayer(index)} className={`w-full rounded-xl border p-4 text-left ${simulation.activeLayer === index ? 'border-lime-200 bg-lime-200/10' : 'border-white/10 bg-black/20'}`}><div className="flex justify-between gap-3"><div><span className="text-teal-100">{item.icon}</span><strong className="ml-2 text-sm">{item.title}</strong><p className="mt-2 text-xs text-slate-400">{item.role}</p></div><span className="font-mono text-[9px] text-lime-100">{simulation.activeLayer === index ? 'ATIVA' : 'CAMADA'}</span></div><div className="mt-2 flex flex-wrap gap-1">{item.algorithms.map((algorithm) => <span className="rounded bg-white/5 px-2 py-1 font-mono text-[9px] text-teal-100" key={algorithm}>{algorithm}</span>)}</div></button></div>)}</div><aside className="rounded-2xl border border-white/10 bg-black/20 p-5"><p className="font-mono text-[10px] text-teal-100">EXPLICAÇÃO DA CAMADA</p><h2 className="mt-2 text-lg font-bold">{layer.title}</h2><dl className="mt-4 grid gap-3 text-xs leading-5"><div><dt className="text-slate-500">ENTRADA</dt><dd>{layer.input}</dd></div><div><dt className="text-slate-500">PROCESSO</dt><dd>{layer.process}</dd></div><div><dt className="text-slate-500">SAÍDA</dt><dd>{layer.output}</dd></div><div><dt className="text-slate-500">PROPRIEDADE</dt><dd className="text-lime-100">{layer.security}</dd></div></dl><p className="mt-5 border-t border-white/10 pt-4 font-mono text-[10px] text-teal-100">PKI: {pkiSteps.join(' → ')}</p></aside></div><article className="mt-5 rounded-xl border border-teal-300/20 bg-teal-300/5 p-4" aria-live="polite"><strong className="font-mono text-[10px] text-teal-100">ESTADO</strong><p className="mt-2 text-xs text-slate-200">{status}</p></article><div className="mt-5 grid gap-4 lg:grid-cols-[1fr_.8fr]"><article className="rounded-xl border border-white/10 bg-[#0c2829] p-4"><div className="flex justify-between"><div><p className="font-mono text-[10px] text-teal-100">ARQUIVOS E CÓDIGO GERADOS</p><p className="mt-1 text-xs text-slate-400">Selecione um item para abrir sua explicação técnica.</p></div><span className="font-mono text-xs text-lime-100">{simulation.artifacts.length}</span></div><div className="mt-3 grid gap-2">{simulation.artifacts.length ? simulation.artifacts.map((artifact, index) => <button type="button" onClick={() => setSelectedArtifact(artifact)} className="rounded-lg border border-white/10 bg-black/20 p-3 text-left hover:border-teal-300" key={`${artifact.name}-${index}`}><span className="font-mono text-[9px] text-teal-100">{artifact.type}</span><strong className="ml-2 text-xs">{artifact.name}</strong><code className="mt-2 block truncate text-[10px] text-slate-400">{artifact.content}</code></button>) : <p className="text-xs text-slate-500">Avance uma etapa para gerar o primeiro artefato.</p>}</div></article><article className="rounded-xl border border-white/10 bg-black/20 p-4"><p className="font-mono text-[10px] text-teal-100">DETALHE DO ARTEFATO</p>{selectedArtifact ? <><h2 className="mt-2 text-sm font-bold">{selectedArtifact.name}</h2><p className="mt-2 text-xs leading-5 text-slate-300">{selectedArtifact.description}</p><code className="mt-4 block whitespace-pre-wrap break-all rounded bg-black/30 p-3 font-mono text-[10px] leading-5 text-lime-100">{selectedArtifact.content}</code><p className="mt-3 text-[10px] text-slate-500">Gerado em: {selectedArtifact.producedAt}</p></> : <p className="mt-3 text-xs text-slate-500">Clique em um arquivo para ver seu código, origem e finalidade.</p>}</article></div></section>;
 }
