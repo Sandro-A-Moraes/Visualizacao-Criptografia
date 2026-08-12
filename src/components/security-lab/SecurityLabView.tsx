@@ -10,6 +10,7 @@ import {
 } from './crypto';
 import type { Certificate, ModuleId, ProcessStep, Tone } from './types';
 import { OverviewLab } from './labs/OverviewLab';
+import { ArchitectureLab } from './labs/ArchitectureLab';
 const initialReport =
   'Paciente: João Silva\nFrequência cardíaca: 76 bpm\nAvaliação: estável.';
 const modules: Array<{
@@ -24,6 +25,12 @@ const modules: Array<{
     label: 'Visão geral',
     concept:
       'Cada camada protege uma propriedade diferente: confidencialidade, integridade, autenticidade ou confiança.',
+  },
+  {
+    id: 'architecture',
+    icon: '⌘',
+    label: 'Arquitetura',
+    concept: 'Canvas dinâmico que mostra dados, PKI e criptografia em cada salto.',
   },
   {
     id: 'sha',
@@ -1372,6 +1379,7 @@ export default function BioCareSecurityLab() {
     ]);
   const content: Record<ModuleId, ReactNode> = {
     overview: <OverviewLab />,
+    architecture: <ArchitectureLab />,
     sha: <ShaLab />,
     aes: <AesLab />,
     signature: <SignatureLab />,

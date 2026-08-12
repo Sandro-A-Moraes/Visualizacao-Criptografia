@@ -1,5 +1,6 @@
 export type ModuleId =
   | 'overview'
+  | 'architecture'
   | 'sha'
   | 'aes'
   | 'signature'
