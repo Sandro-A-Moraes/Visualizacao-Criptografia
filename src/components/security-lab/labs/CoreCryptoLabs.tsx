@@ -1,7 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { decoder, encoder, fromBase64, toBase64, toHex } from '../crypto';
+import {
+  createSha256,
+  createSignature,
+  decryptAesGcm,
+  encryptAesGcm,
+  encoder,
+  toBase64,
+  toHex,
+  verifySignature,
+} from '../crypto';
 import { initialReport } from '../data';
 import type { ProcessStep } from '../types';
 import {
@@ -18,9 +27,7 @@ export function ShaLab() {
   const [hash, setHash] = useState('');
   const [original, setOriginal] = useState('');
   const digest = async () => {
-    const value = toHex(
-      await crypto.subtle.digest('SHA-256', encoder.encode(text))
-    );
+    const value = await createSha256(text);
     setHash(value);
     if (!original) setOriginal(value);
   };
@@ -83,28 +90,13 @@ export function AesLab() {
     encrypted: string;
     recovered?: string;
   }>();
-  const encrypt = async () => {
-    const key = await crypto.subtle.generateKey(
-      { name: 'AES-GCM', length: 256 },
-      true,
-      ['encrypt', 'decrypt']
-    );
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const encrypted = await crypto.subtle.encrypt(
-      { name: 'AES-GCM', iv },
-      key,
-      encoder.encode(text)
-    );
-    setResult({ key, iv: toBase64(iv), encrypted: toBase64(encrypted) });
-  };
+  const encrypt = async () => setResult(await encryptAesGcm(text));
   const decrypt = async () => {
     if (!result) return;
-    const recovered = await crypto.subtle.decrypt(
-      { name: 'AES-GCM', iv: fromBase64(result.iv) },
-      result.key,
-      fromBase64(result.encrypted)
-    );
-    setResult({ ...result, recovered: decoder.decode(recovered) });
+    setResult({
+      ...result,
+      recovered: await decryptAesGcm(result.key, result.iv, result.encrypted),
+    });
   };
   const steps: ProcessStep[] = [
     { title: 'Plaintext', detail: 'Dados legíveis.', data: text },
@@ -159,33 +151,12 @@ export function SignatureLab() {
   }>();
   const [valid, setValid] = useState<boolean>();
   const sign = async () => {
-    const pair = await crypto.subtle.generateKey(
-      { name: 'ECDSA', namedCurve: 'P-256' },
-      true,
-      ['sign', 'verify']
-    );
-    setState({
-      pair,
-      signature: toBase64(
-        await crypto.subtle.sign(
-          { name: 'ECDSA', hash: 'SHA-256' },
-          pair.privateKey,
-          encoder.encode(text)
-        )
-      ),
-    });
+    setState(await createSignature(text));
     setValid(undefined);
   };
   const verify = async () => {
     if (state)
-      setValid(
-        await crypto.subtle.verify(
-          { name: 'ECDSA', hash: 'SHA-256' },
-          state.pair.publicKey,
-          fromBase64(state.signature),
-          encoder.encode(text)
-        )
-      );
+      setValid(await verifySignature(state.pair, state.signature, text));
   };
   return (
     <Section title="Assinatura digital" kicker="ECDSA P-256 REAL">

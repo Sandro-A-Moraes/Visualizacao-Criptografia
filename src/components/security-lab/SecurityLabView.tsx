@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import type { ModuleId } from './types';
-import { initialCertificates, modules } from './data';
+import { modules } from './data';
+import { useCertificates } from './useCertificates';
 import { OverviewLab } from './labs/OverviewLab';
 import { ArchitectureLab } from './labs/ArchitectureLab';
 import { AesLab, HybridLab, ShaLab, SignatureLab } from './labs/CoreCryptoLabs';
@@ -18,28 +19,14 @@ import { SecurityLabShell } from './ui/SecurityLabShell';
 
 export default function BioCareSecurityLab() {
   const [activeModule, setActiveModule] = useState<ModuleId>('overview');
-  const [certificates, setCertificates] = useState(initialCertificates);
+  const {
+    certificates,
+    addCertificate,
+    resetCertificates,
+    revokeCertificate,
+  } = useCertificates();
   const currentModule =
     modules.find((module) => module.id === activeModule) ?? modules[0]!;
-  const revokeCertificate = (serial: string) =>
-    setCertificates((items) =>
-      items.map((item) =>
-        item.serial === serial ? { ...item, status: 'REVOKED' } : item
-      )
-    );
-  const addCertificate = () =>
-    setCertificates((items) => [
-      ...items,
-      {
-        name: 'Clinica Demo',
-        serial: `BC-${crypto.getRandomValues(new Uint32Array(1))[0]!.toString(16).toUpperCase()}`,
-        subject: 'CN=clinica-demo.biocare',
-        issuer: 'BioCare Intermediate CA',
-        usage: 'Client Authentication',
-        status: 'GOOD',
-        valid: '2026-01-01 ate 2027-01-01',
-      },
-    ]);
   const labs = {
     overview: <OverviewLab />,
     architecture: <ArchitectureLab />,
@@ -64,7 +51,7 @@ export default function BioCareSecurityLab() {
       onModuleChange={setActiveModule}
       onReset={() => {
         setActiveModule('overview');
-        setCertificates(initialCertificates);
+        resetCertificates();
       }}
     >
       {labs[activeModule]}
