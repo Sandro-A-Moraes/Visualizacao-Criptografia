@@ -34,8 +34,8 @@ export function SecurityLabShell({
   };
   return (
     <main className="min-h-screen bg-[#071a1c] text-white">
-      <div className="grid min-h-screen lg:grid-cols-[250px_minmax(0,1fr)]">
-        <aside className="border-b border-white/10 bg-[#061719]/90 p-4 lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
+      <div className="grid min-h-screen min-w-0 overflow-x-hidden lg:grid-cols-[250px_minmax(0,1fr)]">
+        <aside className="min-w-0 border-b border-white/10 bg-[#061719]/90 p-4 lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
           <div className="mb-5 flex items-center gap-3">
             <span className="grid size-9 place-items-center bg-lime-200 font-bold text-[#062321]">
               ✦
@@ -48,7 +48,7 @@ export function SecurityLabShell({
             </div>
           </div>
           <nav
-            className="flex gap-1 overflow-auto lg:flex-col"
+            className="flex max-w-full gap-1 overflow-auto lg:flex-col"
             aria-label="Módulos do laboratório"
           >
             {modules.map((module) => (

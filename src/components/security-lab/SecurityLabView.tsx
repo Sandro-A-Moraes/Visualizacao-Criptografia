@@ -7,14 +7,14 @@ import { useCertificates } from './useCertificates';
 import { OverviewLab } from './labs/OverviewLab';
 import { ArchitectureLab } from './labs/ArchitectureLab';
 import { AesLab, HybridLab, ShaLab, SignatureLab } from './labs/CoreCryptoLabs';
+import { CompareLab } from './labs/TrustLabs';
 import {
-  CompareLab,
   IoTLab,
   PkiLab,
   RevocationLab,
   ScenarioLab,
   TlsLab,
-} from './labs/TrustLabs';
+} from './labs/GuidedTrustLabs';
 import { SecurityLabShell } from './ui/SecurityLabShell';
 
 export default function BioCareSecurityLab() {

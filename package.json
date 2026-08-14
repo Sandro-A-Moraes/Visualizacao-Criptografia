@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
     "lint": "eslint .",
     "check-types": "tsc --noEmit --pretty",
     "format": "eslint . --fix && prettier '**/*.{json,yaml}' --write --ignore-path .gitignore"
